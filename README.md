@@ -1,5 +1,19 @@
 # github-action-integration-quickstart
 
+
+This repository provides a GitHub Action for integration purposes.
+
+## Usage
+
+```yaml
+steps:
+  - name: Integration Step
+    uses: zgimszhd61/github-action-integration-quickstart@v1
+    with:
+      myInput: 'Some input'
+
+
+
 要创建一个GitHub Action，让其他人可以集成你的程序到他们的仓库中，你首先需要定义这个Action的功能。假设你的程序是一个Python脚本，它执行一些代码分析或测试。以下是一个基本的GitHub Action示例，用于集成一个名为`my_script.py`的Python脚本。
 
 首先，你需要在你的项目中创建一个`.github/workflows`目录，并在这个目录下创建一个YAML文件，例如`integration.yml`。这个YAML文件将定义Action的工作流程。
