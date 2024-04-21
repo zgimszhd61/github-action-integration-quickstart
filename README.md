@@ -238,3 +238,76 @@ api_key = config['API_KEY']
 
 通过这些措施，你可以增强Docker容器中Python应用的安全性，更有效地保护敏感信息不被泄露。
 
+
+------
+
+为了使你的Python脚本能够接收GitHub仓库地址作为参数，你需要在`action.yml`文件中定义输入参数，并在你的脚本中适当地处理这些参数。这样，当其他人使用你的Action时，他们可以提供特定的仓库地址，你的脚本则能够使用这个地址执行相关的任务。
+
+### 步骤 1: 定义输入参数
+
+在你的`action.yml`文件中，你可以添加一个输入字段来接收仓库地址。例如：
+
+```yaml
+name: 'My GitHub Action'
+description: 'Performs operations using a repository URL.'
+inputs:
+  repository_url:
+    description: 'URL of the repository to operate on.'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - name: Run script
+      run: python your_script.py ${{ inputs.repository_url }}
+      shell: bash
+```
+
+这里，我们定义了一个名为`repository_url`的输入参数，它是必需的，并且在运行Python脚本时作为命令行参数传递。
+
+### 步骤 2: 修改Python脚本以接收参数
+
+在你的Python脚本中，你需要处理命令行参数以接收仓库地址。这可以通过使用标准库中的`argparse`模块来实现。以下是一个简单的例子：
+
+```python
+import argparse
+
+def main():
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('repository_url', type=str, help='URL of the repository to operate on')
+    
+    args = parser.parse_args()
+    
+    # 使用参数
+    print(f"Operating on repository at: {args.repository_url}")
+
+if __name__ == "__main__":
+    main()
+```
+
+这段代码创建了一个解析器对象，定义了一个位置参数`repository_url`，并从命令行读取该参数。当你的脚本被执行时，它会打印出提供的仓库地址。
+
+### 步骤 3: 使用Action
+
+当其他用户在他们的GitHub Actions工作流中引用你的Action时，他们可以这样指定仓库地址：
+
+```yaml
+steps:
+  - name: Use My GitHub Action
+    uses: your-username/your-action-repo@v1
+    with:
+      repository_url: 'https://github.com/example/repo'
+```
+
+这样，`repository_url`的值会被传递给你的Python脚本，并由脚本进行处理。
+
+确保你的GitHub仓库中的文档清晰地说明了如何提供这些参数，这会帮助用户正确地使用你的Action。
+
+
