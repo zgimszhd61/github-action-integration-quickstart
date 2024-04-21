@@ -1,0 +1,26 @@
+name: 'My GitHub Action'
+description: 'This action performs an integration with other repos.'
+inputs:
+  myInput:
+    description: 'Input needed for the action.'
+    required: true
+    default: 'default input'
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - name: Execute my script
+      run: python scripts/my_script.py
+      shell: bash
+
+    - name: Post results
+      run: echo "Action completed."
+      shell: bash
+
