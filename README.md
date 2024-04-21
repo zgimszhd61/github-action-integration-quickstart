@@ -169,3 +169,58 @@ jobs:
 这种方式非常适合于需要保护源代码同时享受Docker带来的环境一致性优势的场景。
 
 
+-----
+
+隐藏Python脚本中的敏感信息（如密钥、密码和API令牌）是保护应用安全的重要步骤。如果你已经将程序打包到Docker镜像中，并在GitHub Actions中使用，你还需要采取以下措施来进一步加固代码并确保敏感信息的安全：
+
+### 1. 使用环境变量
+环境变量是管理配置和敏感信息的一种安全方式。你可以在Docker容器中设置环境变量，并在Python脚本中通过`os.environ`来访问这些变量。
+
+#### 在Dockerfile中设置环境变量：
+你可以在Dockerfile中使用`ENV`命令来设置环境变量，但不建议这样做，因为它会将敏感信息写入镜像。相反，你应该在运行容器时动态传递这些变量：
+
+```bash
+docker run -e "API_KEY=your_api_key" username/my-python-app:latest
+```
+
+#### 在GitHub Actions中设置环境变量：
+在GitHub Actions工作流中，你可以使用`secrets`来安全地处理敏感信息，并在运行容器时将这些信息作为环境变量传递：
+
+```yaml
+- name: Pull and Run Docker Image
+  run: |
+    docker pull username/my-python-app:latest
+    docker run -e API_KEY=${{ secrets.API_KEY }} username/my-python-app:latest
+```
+
+### 2. 使用配置文件
+另一种策略是将配置存储在文件中，而不是直接在代码中。这些配置文件不应该被提交到版本控制系统中。
+
+#### 在Docker中使用配置文件：
+你可以在本地创建配置文件，并在运行容器时将其挂载到容器内：
+
+```bash
+docker run -v $(pwd)/config.json:/app/config.json username/my-python-app:latest
+```
+
+在Python代码中，你可以使用标准的文件读取操作来访问这些配置信息：
+
+```python
+import json
+
+with open('config.json') as config_file:
+    config = json.load(config_file)
+api_key = config['API_KEY']
+```
+
+### 3. 使用秘密管理工具
+对于更复杂的应用，可以考虑使用专门的秘密管理工具，如HashiCorp Vault、AWS Secrets Manager或Azure Key Vault。这些工具专为安全存储和访问敏感信息设计。
+
+### 4. 最小权限原则
+无论在Docker容器还是在GitHub Actions中，都应遵循最小权限原则。只给予程序完成其任务所必需的权限，不多也不少。这有助于减少安全风险。
+
+### 5. 安全审计和日志记录
+确保你的应用有适当的日志记录和监控机制，以便在出现安全问题时迅速响应。同时，定期审计这些日志和你的安全配置。
+
+通过这些措施，你可以增强Docker容器中Python应用的安全性，更有效地保护敏感信息不被泄露。
+
